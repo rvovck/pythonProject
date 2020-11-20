@@ -1,0 +1,269 @@
+---
+openapi: 3.0.0
+info:
+  title: VovkAdAPI
+  description: |
+    The best api to post and look for ad's
+  version: 1.0.0
+servers:
+- url: https://vovkad.com/v1
+paths:
+  /ad:
+    get:
+      tags: 
+        - ad
+      summary: Get global ads
+      description: Returns ads based on query parameters
+      parameters:
+      - name: responseSize
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/responseSize'
+      responses:
+        "200":
+          description: Successfully retrieved a list of global ads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ad'
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+    post:
+      tags: 
+        - ad
+      summary: Create a new global ad
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ad'
+        required: true
+      responses:
+        "201":
+          description: Ad successfully created!
+        "400":
+          description: An identical ad already exists, creation abandoned
+  /ad/{id}:
+    get:
+      tags: 
+        - ad
+      summary: Get a specific ad by id
+      description: Returns the ad with id, ignores city restrictions
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Successfully retrieved the ad
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ad'
+        "404":
+          description: Ad with id not found
+    put:
+      tags: 
+        - ad
+      summary: Update the ad with id
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ad'
+        required: true
+      responses:
+        "200":
+          description: Ad successfully updated
+        "404":
+          description: Ad with id not found
+    delete:
+      tags: 
+        - ad
+      summary: Delete the ad
+      description: Deletes the ad with id, users can only delete their own ads
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Ad successfully deleted
+        "400":
+          description: Bad id
+        "404":
+          description: Ad with id not found
+  /ad/{city}:
+    get:
+      tags: 
+        - ad
+      description: Gets all the ads in the given city
+      parameters:
+      - name: city
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: responseSize
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/responseSize'
+      responses:
+        "200":
+          description: Successfully retrieved a list of local ads for {city}
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ad'
+        "400":
+          description: Bad request
+        "404":
+          description: City name doesn't exist
+  /user:
+    post:
+      tags:
+        - user
+      summary: Create user
+      description: Leave id empty for it to be pre-generated
+      operationId: createUser
+      responses:
+        default:
+          description: successful operation
+        '400':
+          description: invalid username/password or user id taken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Created user object
+        required: true
+  /user/login:
+    get:
+      tags:
+        - user
+      summary: Logs user into the system
+      operationId: loginUser
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+            application/xml:
+              schema:
+                type: string
+        '400':
+          description: Invalid username/password supplied
+  /user/logout:
+    get:
+      tags:
+        - user
+      summary: Logs out current logged in user session
+      operationId: logoutUser
+      responses:
+        default:
+          description: successful operation
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        userName:
+          type: string
+        password:
+          type: string
+        role:
+          type: integer
+    City:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+    Ad:
+      required:
+      - author
+      - title
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        author:
+          $ref: '#/components/schemas/User'
+        city:
+          $ref: '#/components/schemas/City'
+            
+    responseSize:
+      maximum: 1000
+      minimum: 1
+      type: integer
+      example: 35
