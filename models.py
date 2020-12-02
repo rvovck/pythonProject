@@ -17,7 +17,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'users'
 
-    uid = Column(Integer)
+    uid = Column(Integer, unique=True)
     username = Column(String, primary_key=True)
     password = Column(String)
     role = Column(Integer)
@@ -26,7 +26,7 @@ class User(Base):
 class City(Base):
     __tablename__ = 'cities'
 
-    cid = Column(Integer)
+    cid = Column(Integer, unique=True)
     name = Column(String, primary_key=True)
 
 

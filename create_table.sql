@@ -1,22 +1,21 @@
 CREATE TABLE users (
-    uID INT,
+    uID INT UNIQUE,
     userName VARCHAR PRIMARY KEY,
     password VARCHAR,
     role INT
 );
 
 CREATE TABLE cities (
-    cID INT,
+    cID INT UNIQUE,
     name VARCHAR PRIMARY KEY
 );
 
 CREATE TABLE ads (
-    adID INT,
+    adID INT UNIQUE,
     title VARCHAR,
     content VARCHAR,
     author VARCHAR,
     city VARCHAR,
-    PRIMARY KEY (adID),
     FOREIGN KEY (author) REFERENCES users (userName),
     FOREIGN KEY (city) REFERENCES cities (name)
 );

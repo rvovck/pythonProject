@@ -19,13 +19,13 @@ depends_on = None
 
 def upgrade():
     op.create_table('users',
-        Column('uid', Integer),
+        Column('uid', Integer, unique=True),
         Column('username', String, primary_key=True),
         Column('password', String),
         Column('role', Integer))
 
     op.create_table('cities',
-        Column('cid', Integer),
+        Column('cid', Integer, unique=True),
         Column('name', String, primary_key=True))
 
     op.create_table('ads',
