@@ -1,51 +1,57 @@
-from sqlalchemy import *
-from sqlalchemy import orm
+from sqlalchemy import Column, ForeignKey, Integer, String, MetaData, orm
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, scoped_session, relationship
 
-#engine = psycopg2.connect(dbname='postgres', user='postgres', password='976604745', host='localhost')
+from sqlalchemy import create_engine
 
-engine = create_engine('postgresql://postgres:976604745@localhost:5432/postgres')
-SessionFactory = sessionmaker(bind=engine)
-Session = scoped_session(SessionFactory)
+from db_credentials import *
 
-#cursor = engine.cursor()
+engine = create_engine(DATABASE_CONNECTION)
 
-Base = declarative_base()
+metadata = MetaData(engine)
+Base = declarative_base(metadata)
 
 
 class User(Base):
-    __tablename__ = 'users'
-
-    uid = Column(Integer, unique=True)
-    username = Column(String, primary_key=True)
-    password = Column(String)
+    __tablename__ = 'Users'
+    userId = Column(Integer, unique=True)
+    username = Column(String(50), primary_key=True)
+    password = Column(String(250))
     role = Column(Integer)
+
+    '''def __init__(self, username, password, role):
+        self.username = username
+        self.password = password
+        self.role = role'''
 
 
 class City(Base):
-    __tablename__ = 'cities'
+    __tablename__ = 'Cities'
 
-    cid = Column(Integer, unique=True)
-    name = Column(String, primary_key=True)
+    cityId = Column(Integer, unique=True)
+    cityname = Column(String(50), primary_key=True)
+
+    '''def __init__(self, cityId, cityname):
+        self.cityId = cityId
+        self.cityname = cityname'''
 
 
-class AD(Base):
-    __tablename__ = 'ads'
+class Ad(Base):
+    __tablename__ = 'Ads'
 
-    adid = Column(Integer, primary_key=True)
-    title = Column(String)
-    content = Column(String)
-    author = Column(String, ForeignKey(User.username))
-    city = Column(String, ForeignKey(City.name))
+    adId = Column(Integer, autoincrement=True, primary_key=True)
+    title = Column(String(50))
+    content = Column(String(50))
+    author = Column(String(50), ForeignKey('Users.username'))
+    city = Column(String(50), ForeignKey('Cities.cityname'))
 
-    from_user = orm.relationship(User, foreign_keys=[author], backref='adinfo_from', lazy='joined')
-
+    from_user = orm.relationship(User, foreign_keys=[author], backref='adinf_from', lazy='joined')
     from_city = orm.relationship(City, foreign_keys=[city], backref='adinf_from', lazy='joined')
-    #author = relationship('User', backref='adinfo')
-    #city = relationship('City', backref='adinfo')
+
+    '''def __init__(self, title, content, from_user, from_city):
+        self.title = title
+        self.content = content
+        self.author = from_user
+        self.city = from_city'''
 
 
-
-#Base.metadata.create_all(engine)
-
+Base.metadata.create_all(engine)
