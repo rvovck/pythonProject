@@ -33,11 +33,11 @@ def upgrade():
         Column('title', String),
         Column('content', String),
         Column('author', String, ForeignKey(User.username)),
-        Column('city', String, ForeignKey(City.name)))
+        Column('city', String, ForeignKey(City.cityname)))
 
 
 def downgrade():
     op.drop_table(User)
     op.drop_table(City)
-    op.drop_table(AD)
+    op.drop_table(Ad)
 

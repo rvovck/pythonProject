@@ -5,7 +5,8 @@ from sqlalchemy import create_engine
 
 from db_credentials import *
 
-engine = create_engine(DATABASE_CONNECTION)
+#engine = create_engine(DATABASE_CONNECTION)
+engine = create_engine('postgresql://postgres:976604745@localhost:5432/postgres')
 
 metadata = MetaData(engine)
 Base = declarative_base(metadata)
