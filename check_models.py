@@ -1,6 +1,10 @@
 from models import *
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from db_credentials import *
+from models import *
+
+from pythonProject.models import User, City, Ad
 
 engine = create_engine('postgresql://postgres:976604745@localhost:5432/postgres')
 Session = sessionmaker(bind=engine)

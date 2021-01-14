@@ -14,8 +14,8 @@ Base = declarative_base(metadata)
 
 class User(Base):
     __tablename__ = 'Users'
-    userId = Column(Integer, unique=True)
-    username = Column(String(50), primary_key=True)
+    userId = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(50), unique=True)
     password = Column(String(250))
     role = Column(Integer)
 
@@ -28,8 +28,8 @@ class User(Base):
 class City(Base):
     __tablename__ = 'Cities'
 
-    cityId = Column(Integer, unique=True)
-    cityname = Column(String(50), primary_key=True)
+    cityId = Column(Integer, primary_key=True, autoincrement=True)
+    cityname = Column(String(50), unique=True)
 
     '''def __init__(self, cityId, cityname):
         self.cityId = cityId
