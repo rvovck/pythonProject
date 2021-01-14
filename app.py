@@ -1,18 +1,28 @@
+<<<<<<< Updated upstream
 import data as data
 import datetime
 from flask import Flask, request, abort, session, jsonify, render_template, make_response
+=======
+from flask import Flask, request, abort, session, jsonify, render_template
+>>>>>>> Stashed changes
 from wsgiref.simple_server import make_server
 from models import *
-from flask_bcrypt import Bcrypt
 from marshmallow import ValidationError
-from schemas import UserSchema
+from pythonProject.schemas import UserSchema
 from sqlalchemy import *
 from markupsafe import escape
 from sqlalchemy.orm import sessionmaker
-from schemas import *
+from pythonProject.schemas import *
 from sqlalchemy import *
+<<<<<<< Updated upstream
 from flask_jwt import jwt, jwt_required, current_identity
 from functools import wraps
+=======
+from pythonProject.models import *
+from flask_bcrypt import Bcrypt
+
+from pythonProject.db_credentials import DATABASE_CONNECTION
+>>>>>>> Stashed changes
 
 
 engine = create_engine('postgresql://postgres:976604745@localhost:5432/postgres')
@@ -45,19 +55,19 @@ def token_required(f):
 def create_user():
     data = request.json
     if request.method == 'POST':
-        try:
-            user_data = {'userId': data['userId'],
-                         'username': data['username'],
-                         'password': bcrypt.generate_password_hash(data['password']).decode('utf-8'),
-                         'role': data['role']}
+        user_data = {
+                     'username': data['username'],
+                     'password': bcrypt.generate_password_hash(data['password']).decode('utf-8'),
+                     'role': data['role']}
 
+        user = UserSchema().load(user_data)
+        user_reply = sessioner.query(User).filter(User.username == data['username']).one_or_none()
+        if user_reply is None:
             user = UserSchema().load(user_data)
-        except ValidationError as error:
-            print(f'Error: {error.messages}')
-            print(f'Error: {error.valid_data}')
-
-        sessioner.add(user)
-        sessioner.commit()
+            sessioner.add(user)
+            sessioner.commit()
+        else:
+            abort(404, "This username is not available")
         return 'Successfully Registered'
     if request.method == 'PUT':
         try:
@@ -66,9 +76,11 @@ def create_user():
             password = data['password']
             role = data['role']
 
+            user_reply = sessioner.query(User).filter(User.username == data['username']).one_or_none()
+
             if user is None:
                 abort(404, 'Not Found')
-            else:
+            elif user_reply is None:
                 user.username = username
                 user.password = bcrypt.generate_password_hash(password).decode('utf-8')
                 user.role = role
@@ -76,11 +88,14 @@ def create_user():
                 sessioner.commit()
                 result = UserSchema().dump(user)
                 return result
+            else:
+                abort(404, "This username is not available")
 
         except ValidationError as error:
             print(f'Error: {error.messages}')
 
 
+<<<<<<< Updated upstream
 @app.route('/login', methods=['POST'])
 def login():
     password = request.json.get('password', None)
@@ -92,6 +107,33 @@ def login():
         return jsonify({'token': token.decode('utf-8'), 'username': username}), 200
     else:
         return abort(403, 'Invalid password')
+=======
+@app.route('/ad', methods=['GET', 'POST'])
+def create_ad():
+    data = request.json
+    if request.method == 'POST':
+
+        ad_data = {
+            'title': data['title'],
+            'content': data['content'],
+            'author': data['author'],
+            'city': data['city']}
+        user_reply = sessioner.query(User).filter(User.username == data['author']).one_or_none()
+
+        if user_reply is None:
+            abort(404, 'Author Not Found')
+
+        if sessioner.query(City).filter(City.cityname == data['city']).one_or_none():
+            ad = AdSchema().load(ad_data)
+        else:
+            city_data = {
+                'cityname': data['city']
+            }
+            city = CitySchema().load(city_data)
+            sessioner.add(city)
+            sessioner.commit()
+            ad = AdSchema().load(ad_data)
+>>>>>>> Stashed changes
 
 
 @app.route('/ad', methods=['GET'])
@@ -138,6 +180,7 @@ def get_ad_by_adId(current_user, id):
 
     if request.method == 'PUT':
         ad = sessioner.query(Ad).filter(Ad.adId == id).one_or_none()
+<<<<<<< Updated upstream
         if current_user.username == ad.author:
             title = data['title']
             content = data['content']
@@ -145,9 +188,34 @@ def get_ad_by_adId(current_user, id):
             city = data['city']
         if current_user.username != ad.author:
             return 'You can not change this ad'
+=======
+        title = data['title']
+        content = data['content']
+        author = data['author']
+        city = data['city']
+        user_exist = sessioner.query(User).filter(User.username == data['author']).one_or_none()
+        city_exist = sessioner.query(City).filter(City.cityname == data['city']).one_or_none()
+>>>>>>> Stashed changes
 
         if ad is None:
-            abort(404, 'Not Found')
+            abort(404, 'Ad Not Found')
+
+        if user_exist is None:
+            abort(404, 'User Not Found')
+
+        if city_exist is None:
+            city_data = {
+                'cityname': data['city']
+            }
+            new_city = CitySchema().load(city_data)
+            sessioner.add(new_city)
+            sessioner.commit()
+            ad.title = title
+            ad.content = content
+            ad.author = author
+            ad.city = city
+            sessioner.add(ad)
+            sessioner.commit()
         else:
             ad.title = title
             ad.content = content
@@ -155,13 +223,20 @@ def get_ad_by_adId(current_user, id):
             ad.city = city
             sessioner.add(ad)
             sessioner.commit()
-            return 'Updated Successfully'
+
+        return 'Updated Successfully'
+
 
     if request.method == 'DELETE':
         ad = sessioner.query(Ad).filter(Ad.adId == id).one_or_none()
         if ad is None:
+<<<<<<< Updated upstream
             abort(404, 'Not Found')
         elif current_user.username == ad.author:
+=======
+            abort(404, 'Ad Not Found')
+        else:
+>>>>>>> Stashed changes
             sessioner.delete(ad)
             sessioner.commit()
             return 'Deleted successfully'
